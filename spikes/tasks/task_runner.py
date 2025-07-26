@@ -30,10 +30,10 @@ def run_clingo(facts_file: str, task_file: str) -> str:
         )
         stdout, stderr = process.communicate()
         
-        print("Clingo stdout:")
-        print(stdout)
-        print("\nClingo stderr:")
-        print(stderr)
+        # print("Clingo stdout:")
+        # print(stdout)
+        # print("\nClingo stderr:")
+        # print(stderr)
             
         return stdout
     except FileNotFoundError:
@@ -41,14 +41,15 @@ def run_clingo(facts_file: str, task_file: str) -> str:
         sys.exit(1)
 
 
-def parse_out_cells(clingo_output: str) -> List[Tuple[int, int, str]]:
-    """Parse out_cell predicates from clingo output."""
+def parse_cells(clingo_output: str, predicate_name: str) -> List[Tuple[int, int, str]]:
+    """Parse cell predicates from clingo output."""
     cells = []
     
-    # Look for lines containing out_cell predicates
+    # Look for lines containing cell predicates
     for line in clingo_output.split('\n'):
-        # Match out_cell(x, y, color) predicates
-        matches = re.findall(r'out_cell\((\d+),(\d+),(\w+)\)', line)
+        # Match cell(x, y, color) predicates
+        pattern = rf'{predicate_name}\((\d+),(\d+),(\w+)\)'
+        matches = re.findall(pattern, line)
         for match in matches:
             x, y, color = match
             cells.append((int(x), int(y), color))
@@ -56,10 +57,10 @@ def parse_out_cells(clingo_output: str) -> List[Tuple[int, int, str]]:
     return cells
 
 
-def display_grid(cells: List[Tuple[int, int, str]]) -> None:
+def display_grid(cells: List[Tuple[int, int, str]], grid_title: str = "Grid") -> None:
     """Display the cells as a grid in the terminal."""
     if not cells:
-        print("No out_cell predicates found.")
+        print(f"No cells found for {grid_title}.")
         return
     
     # Find grid dimensions
@@ -82,7 +83,7 @@ def display_grid(cells: List[Tuple[int, int, str]]) -> None:
     cell_dict = {(x, y): color for x, y, color in cells}
     
     # Display grid
-    print("\nGrid Output:")
+    print(f"\n{grid_title}:")
     print("  ", end="")
     for x in range(1, max_x + 1):
         print(f"{x} ", end="")
@@ -138,8 +139,14 @@ def main():
         elif "SATISFIABLE" not in clingo_output:
             print("Warning: Could not determine if solution is satisfiable")
         
-        cells = parse_out_cells(clingo_output)
-        display_grid(cells)
+        # Parse and display input grid
+        input_cells = parse_cells(clingo_output, "in_cell")
+        if input_cells:
+            display_grid(input_cells, "INPUT Grid")
+        
+        # Parse and display output grid
+        output_cells = parse_cells(clingo_output, "out_cell")
+        display_grid(output_cells, "OUTPUT Grid")
 
 
 if __name__ == "__main__":
