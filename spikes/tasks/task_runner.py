@@ -63,10 +63,6 @@ def display_grid(cells: List[Tuple[int, int, str]], grid_title: str = "Grid") ->
         print(f"No cells found for {grid_title}.")
         return
     
-    # Find grid dimensions
-    max_x = max(cell[0] for cell in cells)
-    max_y = max(cell[1] for cell in cells)
-    
     # Create color mapping for terminal display
     color_map = {
         'cyan': '\033[96m■\033[0m',
@@ -85,13 +81,13 @@ def display_grid(cells: List[Tuple[int, int, str]], grid_title: str = "Grid") ->
     # Display grid
     print(f"\n{grid_title}:")
     print("  ", end="")
-    for x in range(1, max_x + 1):
+    for x in range(11):  # 0 to 10
         print(f"{x} ", end="")
     print()
     
-    for y in range(1, max_y + 1):
-        print(f"{y} ", end="")
-        for x in range(1, max_x + 1):
+    for y in range(11):  # 0 to 10
+        print(f"{y:2}", end=" ")  # Right-align single digits
+        for x in range(11):
             if (x, y) in cell_dict:
                 color = cell_dict[(x, y)]
                 print(color_map.get(color, '?'), end=" ")
